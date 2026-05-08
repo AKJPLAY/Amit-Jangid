@@ -278,7 +278,8 @@
 
 .aj-popup__color-btn {
   flex: 1;
-  padding: 10px 8px;
+  /* Left padding leaves room for the colored stripe */
+  padding: 10px 8px 10px 14px;
   background: #fff;
   border: none;
   border-right: 0.5px solid #000;
@@ -290,6 +291,7 @@
   text-transform: capitalize;
   letter-spacing: -0.02em;
   line-height: 1;
+  position: relative;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
@@ -297,9 +299,25 @@
   border-right: none;
 }
 
+/* Thin colored stripe on the left — color set via --swatch-color in JS */
+.aj-popup__color-btn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--swatch-color, #ccc);
+}
+
 .aj-popup__color-btn.is-selected {
   background: #000;
   color: #fff;
+}
+
+/* Keep the stripe visible even when selected */
+.aj-popup__color-btn.is-selected::before {
+  opacity: 0.7;
 }
 
 .aj-popup__color-btn:hover:not(.is-selected) {

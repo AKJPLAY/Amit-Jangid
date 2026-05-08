@@ -158,12 +158,18 @@
 
   function renderColorSwatches(colors) {
     var items = colors.map(function (c) {
+      /* Resolve a CSS color from the label so the stripe is accurate.
+         Most standard color names are valid CSS — fall back to #ccc
+         for anything unrecognised (e.g. "Coral Reef"). */
+      var cssColor = resolveCssColor(c);
       return (
         '<button' +
           ' class="aj-popup__color-btn"' +
           ' data-value="' + escHtml(c) + '"' +
           ' type="button"' +
           ' aria-pressed="false"' +
+          /* CSS custom property drives the ::before stripe */
+          ' style="--swatch-color:' + cssColor + '"' +
         '>' +
           escHtml(c) +
         '</button>'
@@ -176,6 +182,38 @@
         '<div class="aj-popup__color-swatches">' + items + '</div>' +
       '</div>'
     );
+  }
+
+  /**
+   * Maps a color label to a CSS color value.
+   * Falls back gracefully for non-standard names by trying the raw label
+   * (e.g. "Blue", "Navy" are valid CSS), then returning a neutral grey.
+   *
+   * @param {string} label  e.g. "Blue", "Coral Reef", "Off-White"
+   * @returns {string} CSS color string
+   */
+  function resolveCssColor(label) {
+    var overrides = {
+      'grey':      '#888888',
+      'gray':      '#888888',
+      'off-white': '#f5f5f5',
+      'off white': '#f5f5f5',
+      'cream':     '#fffdd0',
+      'beige':     '#f5e6c8',
+      'navy':      '#001f5b',
+      'dark blue': '#003580',
+      'light blue':'#add8e6',
+      'light grey':'#d3d3d3',
+      'light gray':'#d3d3d3',
+      'dark grey': '#555555',
+      'dark gray': '#555555',
+    };
+
+    var lower = label.toLowerCase();
+    if (overrides[lower]) return overrides[lower];
+
+    /* Most basic CSS named colors (red, blue, black, white, green…) work as-is */
+    return label;
   }
 
   /* ── Size dropdown ──────────────────────────────────────────────────────── */
