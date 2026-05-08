@@ -470,32 +470,42 @@
 
   /**
    * Returns the index of an option by name (case-insensitive).
-   * @param {string[]} options
-   * @param {string}   name
+   * Handles both string arrays ["Color","Size"] and object arrays
+   * [{name:"Color", values:[...]}, ...] — Shopify returns either format
+   * depending on API version / theme context.
+   *
+   * @param {Array}  options  product.options from /products/HANDLE.js
+   * @param {string} name     option name to look for, e.g. "color"
    * @returns {number} -1 if not found
    */
   function indexOfOption(options, name) {
+    if (!Array.isArray(options)) return -1;
     var lower = name.toLowerCase();
     return options.findIndex(function (o) {
-      return o.toLowerCase() === lower;
+      // o may be a plain string OR an option object {name, values, position}
+      var optName = typeof o === 'string' ? o : (o && o.name ? String(o.name) : '');
+      return optName.toLowerCase() === lower;
     });
   }
 
   /**
    * Collects unique values for a given option index across all variants,
    * preserving the order they first appear.
+   * Safely skips null / undefined entries.
    *
    * @param {Array}  variants
    * @param {number} optionIndex  0-based
    * @returns {string[]}
    */
   function uniqueOptionValues(variants, optionIndex) {
+    if (!Array.isArray(variants)) return [];
+    var key  = 'option' + (optionIndex + 1);
     var seen = Object.create(null);
     return variants.reduce(function (acc, v) {
-      var val = v['option' + (optionIndex + 1)];
-      if (val != null && !seen[val]) {
+      var val = v[key];
+      if (val != null && val !== '' && !seen[val]) {
         seen[val] = true;
-        acc.push(val);
+        acc.push(String(val));
       }
       return acc;
     }, []);
