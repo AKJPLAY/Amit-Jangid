@@ -29,37 +29,49 @@
         "block_1": {
           "type": "product",
           "settings": {
-            "product": "blue-silk-tuxedo"
+            "product": "blue-silk-tuxedo",
+            "btn_top": 78,
+            "btn_left": 50
           }
         },
         "block_2": {
           "type": "product",
           "settings": {
-            "product": "classic-leather-jacket"
+            "product": "classic-leather-jacket",
+            "btn_top": 31,
+            "btn_left": 50
           }
         },
         "block_3": {
           "type": "product",
           "settings": {
-            "product": "dark-denim-top"
+            "product": "dark-denim-top",
+            "btn_top": 90,
+            "btn_left": 46
           }
         },
         "block_4": {
           "type": "product",
           "settings": {
-            "product": "classic-varsity-top"
+            "product": "classic-varsity-top",
+            "btn_top": 40,
+            "btn_left": 50
           }
         },
         "block_5": {
           "type": "product",
           "settings": {
-            "product": "silk-summer-top"
+            "product": "silk-summer-top",
+            "btn_top": 77,
+            "btn_left": 37
           }
         },
         "block_6": {
           "type": "product",
           "settings": {
-            "product": "dark-winter-jacket"
+            "product": "dark-winter-jacket",
+            "btn_top": 78,
+            "btn_left": 59
           }
         }
       },
