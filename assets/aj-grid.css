@@ -1,0 +1,413 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   AJ Product Grid + Popup
+   Fonts: Jost (300/400) + Lustria — inherited from aj-banner or loaded in section
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Reset scoped to section ─────────────────────────────────────────────── */
+.aj-grid *,
+.aj-grid *::before,
+.aj-grid *::after {
+  box-sizing: border-box;
+}
+
+/* ─── Grid section wrapper ───────────────────────────────────────────────── */
+
+.aj-grid {
+  padding: 60px 0 80px;
+  font-family: 'Jost', sans-serif;
+}
+
+.aj-grid__inner {
+  max-width: 1377px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ─── Section heading ────────────────────────────────────────────────────── */
+
+.aj-grid__title {
+  font-family: 'Lustria', serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 36px;
+  color: #000;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* ─── Product grid ───────────────────────────────────────────────────────── */
+
+.aj-grid__products {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ─── Individual card ────────────────────────────────────────────────────── */
+
+.aj-grid__card {
+  position: relative;
+}
+
+.aj-grid__img-wrap {
+  position: relative;
+  aspect-ratio: 433 / 444;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.aj-grid__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.aj-grid__card:hover .aj-grid__img {
+  transform: scale(1.04);
+}
+
+/* Placeholder SVG */
+.aj-grid__img--placeholder {
+  object-fit: contain;
+  padding: 20%;
+}
+
+/* ─── Plus (quick-view) button ───────────────────────────────────────────── */
+
+.aj-grid__plus-btn {
+  position: absolute;
+  /* Default: centred in the card — each card's subject differs, so a
+     central position is a safe universal default */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 2;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  /* Override transform to keep translate(-50%,-50%) while scaling */
+  will-change: transform;
+}
+
+.aj-grid__plus-btn:hover {
+  background: #000;
+  color: #fff;
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.aj-grid__plus-icon {
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 300;
+  font-family: 'Jost', sans-serif;
+  color: currentColor;
+  display: block;
+  /* Optical centering */
+  margin-top: -1px;
+}
+
+/* ─── Popup overlay ──────────────────────────────────────────────────────── */
+
+.aj-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.aj-popup-overlay.is-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ─── Popup box ──────────────────────────────────────────────────────────── */
+
+.aj-popup {
+  position: relative;
+  background: #fff;
+  width: 311px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
+  font-family: 'Jost', sans-serif;
+  /* Slide-up entry */
+  transform: translateY(12px);
+  transition: transform 0.25s ease;
+  /* Constrain height on very small screens */
+  max-height: 90vh;
+  overflow-y: auto;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.aj-popup-overlay.is-open .aj-popup {
+  transform: translateY(0);
+}
+
+/* ── Close button ───────────────────────────────────────────────────────── */
+
+.aj-popup__close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #000;
+  padding: 4px 6px;
+  z-index: 2;
+  transition: opacity 0.2s;
+}
+
+.aj-popup__close:hover {
+  opacity: 0.5;
+}
+
+/* ── Popup content ──────────────────────────────────────────────────────── */
+
+/* Loading / error states */
+.aj-popup__loading,
+.aj-popup__error {
+  padding: 50px 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.aj-popup__error {
+  color: #c00;
+}
+
+/* ── Product body (image + info) ────────────────────────────────────────── */
+
+.aj-popup__body {
+  display: flex;
+  align-items: flex-start;
+  padding: 36px 17px 16px;
+  gap: 12px;
+}
+
+.aj-popup__left {
+  flex-shrink: 0;
+  width: 120px;
+}
+
+.aj-popup__product-img {
+  width: 100%;
+  aspect-ratio: 120 / 140;
+  object-fit: cover;
+  display: block;
+}
+
+.aj-popup__right {
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.aj-popup__product-name {
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #000;
+  line-height: 1.2;
+  margin: 0 0 6px;
+}
+
+.aj-popup__product-price {
+  font-family: 'Lustria', serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #000;
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.aj-popup__product-desc {
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  color: #000;
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* ── Variant groups ─────────────────────────────────────────────────────── */
+
+.aj-popup__variant-group {
+  padding: 0 17px 0;
+}
+
+.aj-popup__variant-label {
+  font-family: 'Jost', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.3;
+  margin: 0 0 4px;
+}
+
+/* Color swatch strip */
+.aj-popup__color-swatches {
+  display: flex;
+  border: 0.5px solid #000;
+  margin-bottom: 16px;
+}
+
+.aj-popup__color-btn {
+  flex: 1;
+  padding: 10px 8px;
+  background: #fff;
+  border: none;
+  border-right: 0.5px solid #000;
+  cursor: pointer;
+  font-family: 'Jost', sans-serif;
+  font-size: 18px;
+  color: #000;
+  text-align: left;
+  text-transform: capitalize;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.aj-popup__color-btn:last-child {
+  border-right: none;
+}
+
+.aj-popup__color-btn.is-selected {
+  background: #000;
+  color: #fff;
+}
+
+.aj-popup__color-btn:hover:not(.is-selected) {
+  background: #f5f5f5;
+}
+
+/* Size dropdown */
+.aj-popup__size-wrap {
+  position: relative;
+  border: 0.5px solid #000;
+  margin-bottom: 16px;
+}
+
+.aj-popup__size-select {
+  width: 100%;
+  padding: 12px 36px 12px 10px;
+  background: transparent;
+  border: none;
+  font-family: 'Jost', sans-serif;
+  font-size: 16px;
+  color: #000;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  letter-spacing: -0.02em;
+  outline: none;
+}
+
+.aj-popup__caret {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Popup footer (ATC) ─────────────────────────────────────────────────── */
+
+.aj-popup__footer {
+  padding: 4px 17px 25px;
+}
+
+/* Extend the shared .aj-btn styles */
+.aj-popup__footer .aj-btn--black {
+  width: 100%;
+  min-width: unset;
+  justify-content: center;
+  padding: 13px 20px;
+}
+
+.aj-popup__footer .aj-btn--black:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.aj-popup__footer .aj-btn--black:disabled::after {
+  display: none;
+}
+
+/* Status message */
+.aj-popup__msg {
+  text-align: center;
+  font-size: 13px;
+  padding: 6px 17px 2px;
+  margin: 0;
+  color: #333;
+}
+
+/* ─── Mobile (≤ 749px) ───────────────────────────────────────────────────── */
+
+@media screen and (max-width: 749px) {
+  .aj-grid {
+    padding: 40px 0 60px;
+  }
+
+  .aj-grid__inner {
+    gap: 20px;
+    padding: 0 16px;
+  }
+
+  .aj-grid__title {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .aj-grid__products {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .aj-grid__img-wrap {
+    aspect-ratio: 169 / 186;
+  }
+
+  .aj-grid__plus-btn {
+    width: 16px;
+    height: 16px;
+  }
+
+  .aj-grid__plus-icon {
+    font-size: 12px;
+  }
+
+  /* Full-width popup on mobile */
+  .aj-popup {
+    width: calc(100% - 32px);
+    max-width: 375px;
+  }
+}
