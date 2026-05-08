@@ -25,19 +25,59 @@
     "aj_grid": {
       "type": "aj-grid",
       "blocks": {
-        "block_1": { "type": "product", "settings": {} },
-        "block_2": { "type": "product", "settings": {} },
-        "block_3": { "type": "product", "settings": {} },
-        "block_4": { "type": "product", "settings": {} },
-        "block_5": { "type": "product", "settings": {} },
-        "block_6": { "type": "product", "settings": {} }
+        "block_1": {
+          "type": "product",
+          "settings": {
+            "product": "blue-silk-tuxedo"
+          }
+        },
+        "block_2": {
+          "type": "product",
+          "settings": {
+            "product": "classic-leather-jacket"
+          }
+        },
+        "block_3": {
+          "type": "product",
+          "settings": {
+            "product": "dark-denim-top"
+          }
+        },
+        "block_4": {
+          "type": "product",
+          "settings": {
+            "product": "classic-varsity-top"
+          }
+        },
+        "block_5": {
+          "type": "product",
+          "settings": {
+            "product": "silk-summer-top"
+          }
+        },
+        "block_6": {
+          "type": "product",
+          "settings": {
+            "product": "dark-winter-jacket"
+          }
+        }
       },
-      "block_order": ["block_1", "block_2", "block_3", "block_4", "block_5", "block_6"],
+      "block_order": [
+        "block_1",
+        "block_2",
+        "block_3",
+        "block_4",
+        "block_5",
+        "block_6"
+      ],
       "settings": {
         "section_title": "Tisso vison in the wild",
         "soft_winter_jacket_handle": "soft-winter-jacket"
       }
     }
   },
-  "order": ["aj_banner", "aj_grid"]
+  "order": [
+    "aj_banner",
+    "aj_grid"
+  ]
 }
