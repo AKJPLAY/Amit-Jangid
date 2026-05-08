@@ -45,8 +45,11 @@
 
     fetchProduct(productHandle)
       .then(renderPopup)
-      .catch(function () {
-        content.innerHTML = '<p class="aj-popup__error">Could not load product details.</p>';
+      .catch(function (err) {
+        console.error('[AJ Popup] Failed to load product "' + productHandle + '":', err);
+        content.innerHTML =
+          '<p class="aj-popup__error">Could not load product details.<br>' +
+          '<small style="opacity:.6">' + escHtml(String(err.message)) + '</small></p>';
       });
   }
 
@@ -68,10 +71,16 @@
    * @returns {Promise<Object>} Shopify product object
    */
   function fetchProduct(handle) {
-    return fetch('/products/' + handle + '.js', {
+    if (!handle) return Promise.reject(new Error('No product handle provided'));
+
+    var url = '/products/' + handle + '.js';
+    console.log('[AJ Popup] Fetching:', url);
+
+    return fetch(url, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(function (res) {
-      if (!res.ok) throw new Error('Product fetch failed: ' + res.status);
+      console.log('[AJ Popup] Response status:', res.status, 'for', url);
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' for /products/' + handle + '.js — is the product published on the Online Store?');
       return res.json();
     });
   }
@@ -149,12 +158,18 @@
 
   function renderColorSwatches(colors) {
     var items = colors.map(function (c) {
+      /* Resolve a CSS color from the label so the stripe is accurate.
+         Most standard color names are valid CSS — fall back to #ccc
+         for anything unrecognised (e.g. "Coral Reef"). */
+      var cssColor = resolveCssColor(c);
       return (
         '<button' +
           ' class="aj-popup__color-btn"' +
           ' data-value="' + escHtml(c) + '"' +
           ' type="button"' +
           ' aria-pressed="false"' +
+          /* CSS custom property drives the ::before stripe */
+          ' style="--swatch-color:' + cssColor + '"' +
         '>' +
           escHtml(c) +
         '</button>'
@@ -167,6 +182,38 @@
         '<div class="aj-popup__color-swatches">' + items + '</div>' +
       '</div>'
     );
+  }
+
+  /**
+   * Maps a color label to a CSS color value.
+   * Falls back gracefully for non-standard names by trying the raw label
+   * (e.g. "Blue", "Navy" are valid CSS), then returning a neutral grey.
+   *
+   * @param {string} label  e.g. "Blue", "Coral Reef", "Off-White"
+   * @returns {string} CSS color string
+   */
+  function resolveCssColor(label) {
+    var overrides = {
+      'grey':      '#888888',
+      'gray':      '#888888',
+      'off-white': '#f5f5f5',
+      'off white': '#f5f5f5',
+      'cream':     '#fffdd0',
+      'beige':     '#f5e6c8',
+      'navy':      '#001f5b',
+      'dark blue': '#003580',
+      'light blue':'#add8e6',
+      'light grey':'#d3d3d3',
+      'light gray':'#d3d3d3',
+      'dark grey': '#555555',
+      'dark gray': '#555555',
+    };
+
+    var lower = label.toLowerCase();
+    if (overrides[lower]) return overrides[lower];
+
+    /* Most basic CSS named colors (red, blue, black, white, green…) work as-is */
+    return label;
   }
 
   /* ── Size dropdown ──────────────────────────────────────────────────────── */
@@ -430,7 +477,12 @@
     if (!btn) return;
     e.preventDefault();
     var handle = btn.dataset.productHandle;
-    if (handle) openPopup(handle);
+    console.log('[AJ Popup] Plus button clicked, handle:', handle);
+    if (handle) {
+      openPopup(handle);
+    } else {
+      console.warn('[AJ Popup] Button has no data-product-handle attribute. Make sure a product is assigned in the customizer.');
+    }
   });
 
   /* Close button */
@@ -456,32 +508,42 @@
 
   /**
    * Returns the index of an option by name (case-insensitive).
-   * @param {string[]} options
-   * @param {string}   name
+   * Handles both string arrays ["Color","Size"] and object arrays
+   * [{name:"Color", values:[...]}, ...] — Shopify returns either format
+   * depending on API version / theme context.
+   *
+   * @param {Array}  options  product.options from /products/HANDLE.js
+   * @param {string} name     option name to look for, e.g. "color"
    * @returns {number} -1 if not found
    */
   function indexOfOption(options, name) {
+    if (!Array.isArray(options)) return -1;
     var lower = name.toLowerCase();
     return options.findIndex(function (o) {
-      return o.toLowerCase() === lower;
+      // o may be a plain string OR an option object {name, values, position}
+      var optName = typeof o === 'string' ? o : (o && o.name ? String(o.name) : '');
+      return optName.toLowerCase() === lower;
     });
   }
 
   /**
    * Collects unique values for a given option index across all variants,
    * preserving the order they first appear.
+   * Safely skips null / undefined entries.
    *
    * @param {Array}  variants
    * @param {number} optionIndex  0-based
    * @returns {string[]}
    */
   function uniqueOptionValues(variants, optionIndex) {
+    if (!Array.isArray(variants)) return [];
+    var key  = 'option' + (optionIndex + 1);
     var seen = Object.create(null);
     return variants.reduce(function (acc, v) {
-      var val = v['option' + (optionIndex + 1)];
-      if (val != null && !seen[val]) {
+      var val = v[key];
+      if (val != null && val !== '' && !seen[val]) {
         seen[val] = true;
-        acc.push(val);
+        acc.push(String(val));
       }
       return acc;
     }, []);

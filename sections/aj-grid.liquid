@@ -82,11 +82,17 @@
                   data-product-handle is consumed by aj-popup.js to fetch
                   product data on demand — no preloaded JSON needed.
                 {%- endcomment -%}
+                {%- comment -%}
+                  Plus button — position driven by per-block customizer settings.
+                  top / left are percentages (0–100) relative to the card image.
+                  Defaults to 50 / 50 (centre) if not set.
+                {%- endcomment -%}
                 <button
                   class="aj-grid__plus-btn"
                   type="button"
                   data-product-handle="{{ product.handle }}"
                   aria-label="Quick view {{ product.title | escape }}"
+                  style="top:{{ block.settings.btn_top }}%;left:{{ block.settings.btn_left }}%;transform:translate(-50%,-50%);"
                 >
                   <span class="aj-grid__plus-icon" aria-hidden="true">+</span>
                 </button>
@@ -172,6 +178,30 @@
           "type": "product",
           "id": "product",
           "label": "Product"
+        },
+        {
+          "type": "header",
+          "content": "+ Button Position"
+        },
+        {
+          "type": "range",
+          "id": "btn_top",
+          "label": "Top (%)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 50,
+          "info": "Vertical position of the + button as a percentage of the card height"
+        },
+        {
+          "type": "range",
+          "id": "btn_left",
+          "label": "Left (%)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 50,
+          "info": "Horizontal position of the + button as a percentage of the card width"
         }
       ]
     }
