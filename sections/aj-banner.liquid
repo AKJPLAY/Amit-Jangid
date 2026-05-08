@@ -1,0 +1,253 @@
+{% comment %}
+  Section: aj-banner
+  Part 1 of 2 — The full-width banner for the Gift Guide page.
+
+  Customizer-editable fields (all text inside red rectangles in the Figma):
+    • Announcement bar text
+    • "Choose Gift" button text + URL
+    • Hero heading
+    • Hero description
+    • "Shop Now" button text + URL
+    • Sub-bar text
+    • Hero background image (desktop)
+    • Hero background image (mobile — optional)
+    • Logo image (optional; falls back to "TISSO VISON" text)
+
+  Design reference: Figma node 1:1588 (desktop) + 1:1802 (mobile)
+{% endcomment %}
+
+{%- comment -%} Load Google Fonts once per page (idempotent via resource hint) {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Lustria&display=swap"
+  rel="stylesheet"
+>
+
+{{ 'aj-banner.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign announcement_text  = section.settings.announcement_text
+  assign gift_btn_text      = section.settings.gift_button_text
+  assign gift_btn_url       = section.settings.gift_button_url
+  assign hero_heading       = section.settings.hero_heading
+  assign hero_description   = section.settings.hero_description
+  assign shop_btn_text      = section.settings.shop_button_text
+  assign shop_btn_url       = section.settings.shop_button_url
+  assign sub_bar_text       = section.settings.sub_bar_text
+  assign hero_image         = section.settings.hero_image
+  assign hero_image_mobile  = section.settings.hero_image_mobile
+  assign logo_image         = section.settings.logo_image
+-%}
+
+<section
+  class="aj-banner"
+  id="aj-banner-{{ section.id }}"
+  aria-label="{{ hero_heading | escape }}"
+>
+
+  {%- comment -%}━━━━━━━━━━━━━━━━ ANNOUNCEMENT BAR ━━━━━━━━━━━━━━━━{%- endcomment -%}
+  <div class="aj-banner__announcement-bar">
+
+    {%- comment -%} Logo — image picker preferred, text fallback {%- endcomment -%}
+    <a href="{{ routes.root_url }}" class="aj-banner__logo" aria-label="{{ shop.name }}">
+      {%- if logo_image != blank -%}
+        {{
+          logo_image
+          | image_url: width: 160
+          | image_tag: class: 'aj-banner__logo-img', loading: 'eager', alt: shop.name
+        }}
+      {%- else -%}
+        <span class="aj-banner__logo-text">
+          <span class="aj-banner__logo-primary">TISSO</span>
+          <span class="aj-banner__logo-secondary">VISON</span>
+        </span>
+      {%- endif -%}
+    </a>
+
+    {%- comment -%} Centre announcement text (hidden on mobile) {%- endcomment -%}
+    {%- if announcement_text != blank -%}
+      <p class="aj-banner__announcement-text">{{ announcement_text }}</p>
+    {%- endif -%}
+
+    {%- comment -%} CTA button — yellow with animated wipe {%- endcomment -%}
+    <a
+      href="{{ gift_btn_url | default: '#' }}"
+      class="aj-btn aj-btn--yellow"
+      {%- if gift_btn_url == blank %} aria-disabled="true"{%- endif -%}
+    >
+      <span class="aj-btn__label">{{ gift_btn_text }}</span>
+      <span class="aj-btn__arrow" aria-hidden="true">
+        <svg width="24" height="10" viewBox="0 0 24 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 5H22M22 5L18 1M22 5L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </a>
+
+  </div>
+  {%- comment -%}━━━━━━━━━━━━━━━━━━━ HERO ━━━━━━━━━━━━━━━━━━━━━━━━{%- endcomment -%}
+  <div class="aj-banner__hero">
+
+    {%- comment -%} Background illustration — separate images for desktop/mobile {%- endcomment -%}
+    {%- if hero_image != blank or hero_image_mobile != blank -%}
+      <div class="aj-banner__hero-bg" aria-hidden="true">
+
+        {%- if hero_image != blank -%}
+          {{
+            hero_image
+            | image_url: width: 1440
+            | image_tag:
+              loading: 'eager',
+              fetchpriority: 'high',
+              class: 'aj-banner__hero-bg-img aj-banner__hero-bg-img--desktop',
+              sizes: '100vw',
+              widths: '375, 750, 1100, 1440',
+              alt: ''
+          }}
+        {%- endif -%}
+
+        {%- if hero_image_mobile != blank -%}
+          {{
+            hero_image_mobile
+            | image_url: width: 750
+            | image_tag:
+              loading: 'eager',
+              class: 'aj-banner__hero-bg-img aj-banner__hero-bg-img--mobile',
+              sizes: '100vw',
+              widths: '375, 750',
+              alt: ''
+          }}
+        {%- comment -%} elsif hero_image != blank: desktop image already rendered above — no duplicate needed {%- endcomment -%}
+        {%- endif -%}
+
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Text content — left-aligned on desktop, centred on mobile {%- endcomment -%}
+    <div class="aj-banner__hero-content">
+
+      <h1 class="aj-banner__heading">{{ hero_heading }}</h1>
+
+      {%- if hero_description != blank -%}
+        <p class="aj-banner__description">{{ hero_description }}</p>
+      {%- endif -%}
+
+      <a
+        href="{{ shop_btn_url | default: '#' }}"
+        class="aj-btn aj-btn--black"
+        {%- if shop_btn_url == blank %} aria-disabled="true"{%- endif -%}
+      >
+        <span class="aj-btn__label">{{ shop_btn_text }}</span>
+        <span class="aj-btn__arrow" aria-hidden="true">
+          <svg width="24" height="10" viewBox="0 0 24 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 5H22M22 5L18 1M22 5L18 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </a>
+
+    </div>
+  </div>
+
+  {%- comment -%}━━━━━━━━━━━━━━━━━━━ SUB BAR ━━━━━━━━━━━━━━━━━━━━━{%- endcomment -%}
+  {%- if sub_bar_text != blank -%}
+    <div class="aj-banner__subbar">
+      <p class="aj-banner__subbar-text">{{ sub_bar_text }}</p>
+    </div>
+  {%- endif -%}
+
+</section>
+
+{% schema %}
+{
+  "name": "AJ Banner",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Logo Image",
+      "info": "Leave blank to show text 'TISSO VISON'"
+    },
+    {
+      "type": "header",
+      "content": "Announcement Bar"
+    },
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "Announcement Text",
+      "default": "Find the ideal gift for your loved ones."
+    },
+    {
+      "type": "text",
+      "id": "gift_button_text",
+      "label": "CTA Button Text",
+      "default": "CHOOSE GIFT"
+    },
+    {
+      "type": "url",
+      "id": "gift_button_url",
+      "label": "CTA Button URL"
+    },
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Background Image (Desktop)",
+      "info": "Recommended: 1440 × 780px"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image_mobile",
+      "label": "Background Image (Mobile)",
+      "info": "Optional. Recommended: 375 × 421px. Falls back to desktop image."
+    },
+    {
+      "type": "text",
+      "id": "hero_heading",
+      "label": "Heading",
+      "default": "The Gift Guide"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_description",
+      "label": "Description",
+      "default": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season."
+    },
+    {
+      "type": "text",
+      "id": "shop_button_text",
+      "label": "Button Text",
+      "default": "SHOP NOW"
+    },
+    {
+      "type": "url",
+      "id": "shop_button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "header",
+      "content": "Sub Bar"
+    },
+    {
+      "type": "text",
+      "id": "sub_bar_text",
+      "label": "Sub Bar Text",
+      "default": "SUSTAINABLE, ETHICALLY MADE CLOTHES IN SIZES XXS TO 6XL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "AJ Banner"
+    }
+  ]
+}
+{% endschema %}
