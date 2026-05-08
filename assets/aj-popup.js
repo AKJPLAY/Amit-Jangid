@@ -45,8 +45,11 @@
 
     fetchProduct(productHandle)
       .then(renderPopup)
-      .catch(function () {
-        content.innerHTML = '<p class="aj-popup__error">Could not load product details.</p>';
+      .catch(function (err) {
+        console.error('[AJ Popup] Failed to load product "' + productHandle + '":', err);
+        content.innerHTML =
+          '<p class="aj-popup__error">Could not load product details.<br>' +
+          '<small style="opacity:.6">' + escHtml(String(err.message)) + '</small></p>';
       });
   }
 
@@ -68,10 +71,16 @@
    * @returns {Promise<Object>} Shopify product object
    */
   function fetchProduct(handle) {
-    return fetch('/products/' + handle + '.js', {
+    if (!handle) return Promise.reject(new Error('No product handle provided'));
+
+    var url = '/products/' + handle + '.js';
+    console.log('[AJ Popup] Fetching:', url);
+
+    return fetch(url, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(function (res) {
-      if (!res.ok) throw new Error('Product fetch failed: ' + res.status);
+      console.log('[AJ Popup] Response status:', res.status, 'for', url);
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' for /products/' + handle + '.js — is the product published on the Online Store?');
       return res.json();
     });
   }
@@ -430,7 +439,12 @@
     if (!btn) return;
     e.preventDefault();
     var handle = btn.dataset.productHandle;
-    if (handle) openPopup(handle);
+    console.log('[AJ Popup] Plus button clicked, handle:', handle);
+    if (handle) {
+      openPopup(handle);
+    } else {
+      console.warn('[AJ Popup] Button has no data-product-handle attribute. Make sure a product is assigned in the customizer.');
+    }
   });
 
   /* Close button */
