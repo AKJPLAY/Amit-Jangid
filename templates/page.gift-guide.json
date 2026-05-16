@@ -12,6 +12,7 @@
     "aj_banner": {
       "type": "aj-banner",
       "settings": {
+        "logo_image": "shopify://shop_images/Group_1000007777.svg",
         "announcement_text": "Find the ideal gift for your loved ones.",
         "gift_button_text": "CHOOSE GIFT",
         "gift_button_url": "",
